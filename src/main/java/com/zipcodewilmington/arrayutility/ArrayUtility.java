@@ -1,5 +1,6 @@
 package com.zipcodewilmington.arrayutility;
 
+import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -17,15 +18,22 @@ public class ArrayUtility<T> {
 
 
     public Integer countDuplicatesInMerge(T[] arrayToMerge, T valueToEvaluate) {
-        List<T> list = new ArrayList<>();
-        list.addAll(Arrays.asList(this.array));
-        list.addAll(Arrays.asList(arrayToMerge));
-        T[] mergedArray = toArray(list); // https://stackoverflow.com/questions/6522284/convert-a-generic-list-to-an-array
-
+        T[] mergedArray = merge(arrayToMerge);
         ArrayUtility<T> duplicateCounter = new ArrayUtility<>(mergedArray);
         return duplicateCounter.getNumberOfOccurrences(valueToEvaluate);
     }
 
+    public T[] merge(T[] arrayToMerge) {
+        List<T> modifiableList = new ArrayList<>();
+        List<T> unmodifiableList = Arrays.asList(this.array);
+
+        modifiableList.addAll(unmodifiableList);
+        modifiableList.addAll(Arrays.asList(arrayToMerge));
+        T[] mergedArray = toArray(modifiableList);
+        return mergedArray;
+    }
+
+    // https://stackoverflow.com/questions/6522284/convert-a-generic-list-to-an-array
     public static <T> T[] toArray(List<T> list) {
         T[] toR = (T[]) java.lang.reflect.Array.newInstance(list.get(0)
                 .getClass(), list.size());
@@ -36,7 +44,21 @@ public class ArrayUtility<T> {
     }
 
     public T getMostCommonFromMerge(T[] arrayToMerge) {
-        return null;
+        // whichever element has the most number of duplicates in merge is the value to return
+        T[] mergedArray = merge(arrayToMerge);
+        ArrayUtility<T> arrayUtility =  new ArrayUtility<>(mergedArray);
+        T mostCommonElement = null;
+        Integer highestNumberOfOccurrences = -1;
+
+        for (int i = 0; i < mergedArray.length; i++) {
+            T currentElement = mergedArray[i];
+            int numberOfOccurrencesOfCurrentElement = arrayUtility.getNumberOfOccurrences(currentElement);
+            if(highestNumberOfOccurrences < numberOfOccurrencesOfCurrentElement) {
+                highestNumberOfOccurrences = numberOfOccurrencesOfCurrentElement;
+                mostCommonElement = currentElement;
+            }
+        }
+        return mostCommonElement;
     }
 
     public Integer getNumberOfOccurrences(T valueToEvaluate) {
@@ -53,6 +75,10 @@ public class ArrayUtility<T> {
 
 
     public T[] removeValue(T valueToRemove) {
-        return null;
+        List<T> modifiableList = new ArrayList<>();
+        List<T> unmodifiableList = Arrays.asList(array);
+        modifiableList.addAll(unmodifiableList);
+        modifiableList.removeAll(Arrays.asList(valueToRemove));
+        return toArray(modifiableList);
     }
 }
